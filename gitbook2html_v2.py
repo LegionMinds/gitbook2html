@@ -58,6 +58,8 @@ def fetch_gitbook_content(url, timeout=180):
                 # 1. Remove all <a> tags (hyperlinks)
                 for a_tag in content_div.find_all('a'):
                     a_tag.decompose()  # Completely remove the <a> tag and its contents
+                for button_tag in content_div.find_all('button'):
+                    button_tag.decompose()  # Удалить все кнопки
 
                 # 2. Remove "Last updated" information (assuming it's in a div with a certain class or structure)
                 last_updated_tag = content_div.find(text="Last updated")
@@ -110,22 +112,12 @@ def gitbook_to_html(gitbook_url, output_html):
 
     print(f"Found {len(page_urls)} pages to convert.")
 
-    # Set to track unique titles
-    seen_titles = set()
-
     # Fetch content for each page
     full_content = ""
     for i, page_url in enumerate(page_urls):
         title, content = fetch_gitbook_content(page_url)
-        
-        # Check if the title is already seen
-        if title in seen_titles:
-            print(f"Skipping page with duplicate title: {title}")
-            continue
-
         if content:
             full_content += f"<h1>{title}</h1>{content}"
-            seen_titles.add(title)  # Add title to seen titles set
         else:
             print(f"Warning: Content for page {page_url} could not be fetched or was empty.")
         print(f"Fetched and added content from page {i+1}/{len(page_urls)}: {page_url}")
